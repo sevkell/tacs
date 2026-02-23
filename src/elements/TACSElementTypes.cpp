@@ -36,6 +36,9 @@ int TacsGetTotalOutputCount(ElementType etype, int flag) {
   if (flag & TACS_OUTPUT_EXTRAS) {
     nvals += TacsGetOutputComponentCount(etype, TACS_OUTPUT_EXTRAS);
   }
+  if (flag & TACS_OUTPUT_CUNTZE_FAILURE_MODES) {
+    nvals += TacsGetOutputComponentCount(etype, TACS_OUTPUT_CUNTZE_FAILURE_MODES);
+  }
   if (flag & TACS_OUTPUT_LOADS) {
     nvals += TacsGetOutputComponentCount(etype, TACS_OUTPUT_LOADS);
   }
@@ -89,6 +92,8 @@ int TacsGetOutputComponentCount(ElementType etype, int comp) {
       return 9;
     } else if (comp == TACS_OUTPUT_EXTRAS) {
       return 14;
+    } else if (comp == TACS_OUTPUT_CUNTZE_FAILURE_MODES) {
+      return 9;
     } else if (comp == TACS_OUTPUT_LOADS) {
       return 6;
     } else if (comp == TACS_OUTPUT_COORDINATE_FRAME) {
@@ -330,6 +335,29 @@ const char *TacsGetOutputComponentName(ElementType etype, int comp, int index) {
           return "dv6";
         case 13:
           return "dv7";
+        default:
+          return NULL;
+      }
+    } else if (comp == TACS_OUTPUT_CUNTZE_FAILURE_MODES) {
+      switch (index) {
+        case 0:
+          return "CuntzeMode1";
+        case 1:
+          return "CuntzeMode2";
+        case 2:
+          return "CuntzeMode3";
+        case 3:
+          return "CuntzeMode4";
+        case 4:
+          return "CuntzeMode5";
+        case 5:
+          return "CuntzeMode6";
+        case 6:
+          return "CuntzeMode7";
+        case 7:
+          return "CuntzeMode8";
+        case 8:
+          return "CuntzeMode9";
         default:
           return NULL;
       }

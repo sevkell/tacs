@@ -1495,6 +1495,34 @@ TacsScalar TACSOrthotropicPly::CuntzeFailureModes(const TacsScalar e[],
   return fail;
 }
 
+TacsScalar TACSOrthotropicPly::getCuntzeMode(TacsScalar angle,
+                                             const TacsScalar strain[], 
+                                             int modeIndex) {
+  if (useCuntzeCriterion_UD && modeIndex < 5) {
+    TacsScalar e[3];  // Ply strain
+    transformStrainGlobal2Ply(angle, strain, e);
+
+    TacsScalar s[3];  // Ply stress
+    getPlyStress(e, s);
+
+    TacsScalar modes[5];
+    CuntzeFailureModes(e, s, &modes[0], &modes[1], &modes[2], &modes[3], &modes[4]);
+    return modes[modeIndex];
+  } else if (useCuntzeCriterion_Woven && modeIndex < 9) {
+    TacsScalar e[3];  // Ply strain
+    transformStrainGlobal2Ply(angle, strain, e);
+
+    TacsScalar s[3];  // Ply stress
+    getPlyStress(e, s);
+
+    TacsScalar modes[9];
+    CuntzeFailureModes(e, s, &modes[0], &modes[1], &modes[2], &modes[3], &modes[4], &modes[5], &modes[6], &modes[7], &modes[8]);
+    return modes[modeIndex];
+  } else {
+    return 0.0;
+  }
+}
+
 /*
   Calculate the failure load based on constant and linear components
   of the strain. The components of the strain are in the laminate

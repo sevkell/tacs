@@ -406,6 +406,11 @@ class TACSBladeStiffenedShellConstitutive : public TACSShellConstitutive {
                                    const TacsScalar X[],
                                    const TacsScalar strain[], int failIndex);
 
+  // Retrieve Cuntze's failure mode values for plotting purposes
+  TacsScalar evalFailureModesValue(int elemIndex, const double pt[],
+                                   const TacsScalar X[],
+                                   const TacsScalar strain[], int modeIndex);
+
   /**
    * @brief Compute the effective tensile thickness of the stiffened shell
    *
@@ -699,6 +704,17 @@ class TACSBladeStiffenedShellConstitutive : public TACSShellConstitutive {
    */
   void addPanelFailureDVSens(const TacsScalar strain[], const TacsScalar scale,
                              TacsScalar dfdx[]);
+
+  /**
+   * @brief Compute the requested failure mode of Cuntze's failure criterion 
+   * in the panel
+   *
+   * @param strain Shell strains [e11, e22, y12, k11, k22, k12, y23, y13]
+   * @param modeIndex Index of the requested failure mode
+   * @return TacsScalar The aggregated failure mode value for the panel
+   */
+  TacsScalar computePanelCuntzeFailureMode(const TacsScalar strain[], 
+                                           int modeIndex);
 
   // ==============================================================================
   // Helper functions for computing the stiffner's strain/stress/stiffness
@@ -1391,6 +1407,7 @@ class TACSBladeStiffenedShellConstitutive : public TACSShellConstitutive {
   TacsScalar** stiffenerPlyFailStrainSens;
   TacsScalar* panelPlyFailSens;
   TacsScalar* stiffenerPlyFailSens;
+  TacsScalar* panelPlyModeValues;
 
   static const char* const constName;  ///< Constitutive model name
   static const int NUM_Q_ENTRIES = 6;  ///< Number of entries in the Q matrix

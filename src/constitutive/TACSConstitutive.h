@@ -599,6 +599,23 @@ class TACSConstitutive : public TACSObject {
   }
 
   /**
+    Evaluate the Cuntze failure modes (if defined) at the given quadrature point
+
+    @param elemIndex The local element index
+    @param pt The parametric point
+    @param X The physical node location
+    @param strain The strain value
+    @param modeIndex The mode index
+    @return The failure mode value
+  */
+  virtual TacsScalar evalFailureModesValue(int elemIndex, const double pt[],
+                                           const TacsScalar X[],
+                                           const TacsScalar strain[],
+                                           int modeIndex) {
+    return 0.0;
+  }
+
+  /**
     Compute a two-dimensional representation of the failure envelope
   */
   void getFailureEnvelope(int npts, int elemIndex, const double pt[],

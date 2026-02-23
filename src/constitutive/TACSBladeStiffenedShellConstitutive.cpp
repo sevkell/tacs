@@ -215,6 +215,10 @@ TACSBladeStiffenedShellConstitutive::TACSBladeStiffenedShellConstitutive(
   // Arrays for storing ply failure sensitivities
   this->panelPlyFailSens = new TacsScalar[2 * this->numPanelPlies];
   this->stiffenerPlyFailSens = new TacsScalar[2 * this->numStiffenerPlies];
+
+  // Arrays for storing the values of Cuntze's failure modes, need values 
+  // for each ply angle at the top and bottom of the panel
+  this->panelPlyModeValues = new TacsScalar[2 * _numPanelPlies];
 }
 
 // ==============================================================================
@@ -285,6 +289,9 @@ TACSBladeStiffenedShellConstitutive::~TACSBladeStiffenedShellConstitutive() {
 
   delete[] this->stiffenerPlyFailSens;
   this->stiffenerPlyFailSens = nullptr;
+
+  delete[] this->panelPlyModeValues;
+  this->panelPlyModeValues = nullptr;
 
   delete[] this->panelQMats;
   this->panelQMats = nullptr;
@@ -1100,6 +1107,16 @@ TacsScalar TACSBladeStiffenedShellConstitutive::evalFailureFieldValue(
   }
 }
 
+TacsScalar TACSBladeStiffenedShellConstitutive::evalFailureModesValue(
+    int elemIndex, const double pt[], const TacsScalar X[],
+    const TacsScalar strain[], int modeIndex) {
+  if (modeIndex < 9) {
+    return computePanelCuntzeFailureMode(strain, modeIndex);
+  } else {
+    return 0.0;
+  }
+}
+
 TacsScalar
 TACSBladeStiffenedShellConstitutive::computeEffectiveBendingThickness() {
   TacsScalar IStiff = this->computeStiffenerIzz();
@@ -1617,6 +1634,58 @@ void TACSBladeStiffenedShellConstitutive::addPanelFailureDVSens(
            strain[5] * plyFailStrainSens[2]);
     }
   }
+}
+
+// Compute the requested failure mode of Cuntze's failure criterion in the panel
+TacsScalar TACSBladeStiffenedShellConstitutive::computePanelCuntzeFailureMode(
+    const TacsScalar strain[], int modeIndex) {
+  TacsScalar t = this->panelThick;
+  TacsScalar plyStrain[3];
+  TacsScalar* fail = this->panelPlyModeValues;
+  int numPly = this->numPanelPlies;
+  TacsScalar failval;
+
+  // Compute the strain state at the top of the panel
+  plyStrain[0] = strain[0] + 0.5 * t * strain[3];
+  plyStrain[1] = strain[1] + 0.5 * t * strain[4];
+  plyStrain[2] = strain[2] + 0.5 * t * strain[5];
+
+  // Compute the failure criteria for each ply angle at this strain state. 
+  // Modes with value 0.0 shall not contribute to the KS-function and thus 
+  // are set to a very negative value. 
+  for (int ii = 0; ii < numPly; ii++) {
+    failval = this->panelPly->getCuntzeMode(this->panelPlyAngles[ii], plyStrain, modeIndex);
+    if (TacsRealPart(failval) == 0.0) {
+      fail[ii] = DUMMY_FAIL_VALUE;
+    } else {
+      fail[ii] = failval;
+    }
+  }
+
+  // Now repeat for the bottom of the panel
+  plyStrain[0] = strain[0] - 0.5 * t * strain[3];
+  plyStrain[1] = strain[1] - 0.5 * t * strain[4];
+  plyStrain[2] = strain[2] - 0.5 * t * strain[5];
+
+  for (int ii = 0; ii < numPly; ii++) {
+    failval = this->panelPly->getCuntzeMode(this->panelPlyAngles[ii], plyStrain, modeIndex);
+    if (TacsRealPart(failval) == 0.0) {
+      fail[numPly + ii] = DUMMY_FAIL_VALUE;
+    } else {
+      fail[numPly + ii] = failval;
+    }
+  }
+
+  TacsScalar failAgg = ksAggregation(fail, 2 * numPly, this->ksWeight);
+
+  // if the modes of all plies are zero, the KS-function would return 
+  // a value close to DUMMY_FAIL_VALUE
+  if (TacsRealPart(failAgg) < 0.0) {
+    failAgg = 0.0;
+  }
+
+  // Return the aggregated failure value
+  return failAgg;
 }
 
 // ==============================================================================

@@ -241,6 +241,13 @@ class TACSOrthotropicPly : public TACSObject {
                                 TacsScalar *eff_iff3, TacsScalar *eff_iff4, 
                                 TacsScalar *eff_iff5);
 
+  // Given the strain in the laminate coordinates, determine the failure values 
+  // of Cuntze's failure modes for the purpose of plotting and return the 
+  // requested failure mode value.
+  // --------------------------------------------------------------------------
+  TacsScalar getCuntzeMode(TacsScalar angle, const TacsScalar strain[], 
+                           int modeIndex);
+
   // Calculate the failure load fraction for given
   // constant and linear strain components
   // ---------------------------------------------

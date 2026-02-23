@@ -131,6 +131,11 @@ class pyTACS(BaseUI):
             True,
             "Flag for whether to include element extra variables in f5 file.",
         ],
+        "writeCuntzeFailureModes": [
+            bool,
+            False,
+            "Flag for whether to include all failure modes from the Cuntze failure criterion in f5 file.",
+        ],
         "writeLoads": [
             bool,
             True,
@@ -2355,6 +2360,8 @@ class pyTACS(BaseUI):
             write_flag |= tacs.TACS.OUTPUT_STRESSES
         if self.getOption("writeExtras"):
             write_flag |= tacs.TACS.OUTPUT_EXTRAS
+        if self.getOption("writeCuntzeFailureModes"):
+            write_flag |= tacs.TACS.OUTPUT_CUNTZE_FAILURE_MODES
         if self.getOption("writeLoads"):
             write_flag |= tacs.TACS.OUTPUT_LOADS
         if self.getOption("writeCoordinateFrame"):

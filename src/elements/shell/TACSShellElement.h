@@ -1669,6 +1669,13 @@ void TACSShellElement<quadrature, basis, director, model>::getOutputData(
         }
         data += 14;
       }
+      if (write_flag & TACS_OUTPUT_CUNTZE_FAILURE_MODES) {
+        for (int modeInd = 0; modeInd < 9; modeInd++) {
+          data[modeInd] =
+              con->evalFailureModesValue(elemIndex, pt, X, e, modeInd);
+        }
+        data += 9;
+      }
       if (write_flag & TACS_OUTPUT_COORDINATE_FRAME) {
         data[0] = T[0];
         data[1] = T[3];
