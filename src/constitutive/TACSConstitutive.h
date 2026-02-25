@@ -44,7 +44,7 @@ class TACSConstitutive : public TACSObject {
   /**
     Set the object name
   */
-  const char* getObjectName();
+  const char *getObjectName();
 
   /**
     Return the number of stress and strain components
@@ -624,7 +624,7 @@ class TACSConstitutive : public TACSObject {
                           TacsScalar y_vals[]);
 
  private:
-  static const char* constName;
+  static const char *constName;
 };
 
 #endif  // TACS_CONSTITUTIVE_H
